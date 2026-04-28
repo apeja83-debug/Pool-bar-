@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pool Bar 🏊</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a6b72">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pool Bar">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ocean: #1a6b72;
+    --ocean2: #2d9199;
+    --coral: #e07b54;
+    --sand: #f5ede0;
+    --gold: #c9a84c;
+    --dark: #1c2b2d;
+    --muted: #7a9a9c;
+    --white: #fefcf9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Nunito', sans-serif; background: var(--sand); color: var(--dark); min-height: 100vh; padding-bottom: calc(30px + env(safe-area-inset-bottom)); }
+  header { background: var(--ocean); color: #fff; padding: 20px 18px 14px; padding-top: calc(20px + env(safe-area-inset-top)); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.18); }
+  header h1 { font-size: 1.2rem; font-weight: 800; }
+  header p  { font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
+  .tabs { display: flex; background: var(--ocean); padding: 0 18px 14px; gap: 8px; position: sticky; top: 60px; z-index: 99; }
+  .tab { flex: 1; text-align: center; padding: 9px 4px; border-radius: 10px; font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.5); cursor: pointer; border: none; background: transparent; font-family: 'Nunito', sans-serif; transition: all 0.18s; }
+  .tab.active { background: rgba(255,255,255,0.18); color: #fff; }
+  section { display: none; padding: 16px; }
+  section.active { display: block; }
+  .field { margin-bottom: 13px; }
+  .field label { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 5px; }
+  .field input, .field select { width: 100%; padding: 13px 14px; border: 2px solid #dde8e9; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 1rem; background: var(--white); color: var(--dark); appearance: none; -webkit-appearance: none; outline: none; transition: border-color 0.2s; }
+  .field input:focus, .field select:focus { border-color: var(--ocean2); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn-add { width: 100%; background: var(--coral); color: #fff; border: none; border-radius: 14px; padding: 16px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800; cursor: pointer; margin-top: 4px; box-shadow: 0 4px 14px rgba(224,123,84,0.35); transition: opacity 0.15s, transform 0.12s; }
+  .btn-add:active { opacity: 0.85; transform: scale(0.98); }
+  .sum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sum-card { background: var(--white); border-radius: 14px; padding: 14px 12px; box-shadow: 0 2px 10px rgba(26,107,114,0.08); border-left: 4px solid var(--gold); }
+  .sum-card .s-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 4px; }
+  .sum-card .s-amount { font-size: 1.2rem; font-weight: 800; color: var(--ocean); }
+  .sum-card.total-card { grid-column: 1 / -1; background: var(--ocean); border-left: none; text-align: center; padding: 16px; }
+  .sum-card.total-card .s-label { color: rgba(255,255,255,0.6); }
+  .sum-card.total-card .s-amount { font-size: 1.6rem; color: #fff; }
+  .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .list-header h3 { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+  .btn-clear { background: none; border: 1.5px solid #dde8e9; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; color: var(--muted); cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 600; }
+  .entry-card { background: var(--white); border-radius: 14px; padding: 13px 14px; margin-bottom: 9px; box-shadow: 0 2px 8px rgba(26,107,114,0.07); display: flex; align-items: center; gap: 10px; }
+  .entry-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+  .entry-body { flex: 1; min-width: 0; }
+  .entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
+  .entry-cat { font-size: 0.8rem; font-weight: 700; color: var(--ocean2); }
+  .entry-amount { font-size: 1rem; font-weight: 800; color: var(--ocean); white-space: nowrap; }
+  .entry-desc { font-size: 0.82rem; color: var(--dark); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .entry-meta { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .btn-del { background: none; border: none; color: #ccc; font-size: 1.1rem; cursor: pointer; padding: 6px; flex-shrink: 0; }
+  .btn-del:active { color: var(--coral); }
+  .empty { text-align: center; padding: 50px 20px; color: var(--muted); grid-column: 1 / -1; }
+  .empty .e-icon { font-size: 2.8rem; margin-bottom: 10px; }
+  .empty p { font-size: 0.9rem; font-weight: 600; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--dark); color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 0.88rem; font-weight: 700; transition: transform 0.3s cubic-bezier(.34,1.56,.64,1); z-index: 999; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  #install-banner { display: none; background: var(--gold); color: var(--dark); padding: 10px 18px; font-size: 0.82rem; font-weight: 700; align-items: center; gap: 10px; }
+  #install-banner.visible { display: flex; }
+  #install-banner button { margin-left: auto; background: var(--dark); color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🏊 Pool Bar & Πρωινό</h1>
+  <p>Καταγραφή πωλήσεων σεζόν</p>
+</header>
+<div id="install-banner">
+  📲 Πρόσθεσε στην αρχική οθόνη σου!
+  <button id="install-btn">Εγκατάσταση</button>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('add')">➕ Καταχώρηση</button>
+  <button class="tab" onclick="switchTab('summary')">📊 Σύνοψη</button>
+  <button class="tab" onclick="switchTab('list')">📋 Λίστα</button>
+</div>
+<section id="tab-add" class="active">
+  <div class="row2">
+    <div class="field"><label>Ημερομηνία</label><input type="date" id="inp-date"></div>
+    <div class="field"><label>Δωμάτιο</label><input type="text" id="inp-room" placeholder="π.χ. 101" inputmode="text"></div>
+  </div>
+  <div class="field">
+    <label>Κατηγορία</label>
+    <select id="inp-cat">
+      <option value="">— επιλογή —</option>
+      <optgroup label="🍹 Ποτά">
+        <option value="cocktail">🍹 Cocktail</option>
+        <option value="beer">🍺 Μπύρα</option>
+        <option value="wine">🍷 Κρασί</option>
+        <option value="water">💧 Νερό / Αναψυκτικό</option>
+        <option value="coffee">☕ Καφές</option>
+        <option value="juice">🥤 Χυμός</option>
+        <option value="other">🥃 Άλλο ποτό</option>
+      </optgroup>
+      <optgroup label="🍽 Φαγητό">
+        <option value="πρωινό">🍳 Πρωινό (extra)</option>
+        <option value="σνακ">🥪 Σνακ</option>
+      </optgroup>
+    </select>
+  </div>
+  <div class="field"><label>Είδος (προαιρετικό)</label><input type="text" id="inp-item" placeholder="π.χ. Mojito, Espresso..."></div>
+  <div class="row2">
+    <div class="field"><label>Ποσό (€)</label><input type="number" id="inp-amount" placeholder="0.00" step="0.50" min="0" inputmode="decimal"></div>
+    <div class="field"><label>Σημείωση</label><input type="text" id="inp-note" placeholder="προαιρετικό"></div>
+  </div>
+  <button class="btn-add" onclick="addEntry()">✔ Καταχώρηση</button>
+</section>
+<section id="tab-summary">
+  <div class="sum-grid" id="sum-grid">
+    <div class="empty"><div class="e-icon">📊</div><p>Δεν υπάρχουν δεδομένα ακόμα.</p></div>
+  </div>
+</section>
+<section id="tab-list">
+  <div class="list-header">
+    <h3 id="list-count">0 εγγραφές</h3>
+    <button class="btn-clear" onclick="clearAll()">🗑 Διαγραφή όλων</button>
+  </div>
+  <div id="entry-list">
+    <div class="empty"><div class="e-icon">🌅</div><p>Δεν υπάρχουν εγγραφές.</p></div>
+  </div>
+</section>
+<div class="toast" id="toast"></div>
+<script>
+  if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(() => {}); }
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; document.getElementById('install-banner').classList.add('visible'); });
+  document.getElementById('install-btn').addEventListener('click', async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; document.getElementById('install-banner').classList.remove('visible'); });
+  const STORAGE_KEY = 'poolbar_v2';
+  const CAT_LABELS = { cocktail:'Cocktail', beer:'Μπύρα', wine:'Κρασί', water:'Νερό/Αναψυκτικό', coffee:'Καφές', juice:'Χυμός', other:'Άλλο ποτό', 'πρωινό':'Πρωινό', 'σνακ':'Σνακ' };
+  const CAT_ICON = { cocktail:'🍹', beer:'🍺', wine:'🍷', water:'💧', coffee:'☕', juice:'🥤', other:'🥃', 'πρωινό':'🍳', 'σνακ':'🥪' };
+  const CAT_COLOR = { cocktail:'#fde8df', beer:'#fef6e0', wine:'#f2e6f5', water:'#e0f4f7', coffee:'#efe8e0', juice:'#e8f7e0', other:'#e8eef0', 'πρωινό':'#e8f7e0', 'σνακ':'#fef0dc' };
+  let entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  document.getElementById('inp-date').valueAsDate = new Date();
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+  function fmt(n) { return n.toLocaleString('el-GR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €'; }
+  function fmtDate(d) { if (!d) return ''; const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; }
+  function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+  function switchTab(tab) { document.querySelectorAll('section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.tab').forEach(b => b.classList.remove('active')); document.getElementById('tab-' + tab).classList.add('active'); const idx = {add:0, summary:1, list:2}[tab]; document.querySelectorAll('.tab')[idx].classList.add('active'); if (tab === 'summary') renderSummary(); if (tab === 'list') renderList(); }
+  function addEntry() {
+    const date=document.getElementById('inp-date').value, room=document.getElementById('inp-room').value.trim(), cat=document.getElementById('inp-cat').value, item=document.getElementById('inp-item').value.trim(), amtRaw=document.getElementById('inp-amount').value, note=document.getElementById('inp-note').value.trim();
+    if (!date||!room||!cat||!amtRaw) { toast('⚠️ Συμπλήρωσε: Δωμάτιο, Κατηγορία, Ποσό'); return; }
+    const amount=parseFloat(amtRaw); if (isNaN(amount)||amount<0) { toast('⚠️ Άκυρο ποσό'); return; }
+    entries.unshift({id:Date.now(),date,room,cat,item,amount,note}); save(); toast('✔ Καταχωρήθηκε!');
+    ['inp-room','inp-cat','inp-item','inp-amount','inp-note'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('inp-date').valueAsDate = new Date();
+  }
+  function deleteEntry(id) { entries=entries.filter(e=>e.id!==id); save(); renderList(); toast('🗑 Διαγράφηκε'); }
+  function clearAll() { if (!entries.length) return; if (confirm('Διαγραφή ΟΛΩΝ; Δεν αναιρείται.')) { entries=[]; save(); renderList(); renderSummary(); toast('🗑 Εκκαθαρίστηκε'); } }
+  function renderSummary() {
+    const grid=document.getElementById('sum-grid');
+    if (!entries.length) { grid.innerHTML='<div class="empty"><div class="e-icon">📊</div><p>Δεν υπάρχουν δεδομένα ακόμα.</p></div>'; return; }
+    const cats={}; let total=0;
+    entries.forEach(e => { cats[e.cat]=(cats[e.cat]||0)+e.amount; total+=e.amount; });
+    const order=['cocktail','beer','wine','water','coffee','juice','other','πρωινό','σνακ'];
+    let html=order.filter(c=>cats[c]).map(c=>`<div class="sum-card"><div class="s-label">${CAT_ICON[c]} ${CAT_LABELS[c]}</div><div class="s-amount">${fmt(cats[c])}</div></div>`).join('');
+    html+=`<div class="sum-card total-card"><div class="s-label">☀️ Σύνολο σεζόν</div><div class="s-amount">${fmt(total)}</div></div>`;
+    grid.innerHTML=html;
+  }
+  function renderList() {
+    const list=document.getElementById('entry-list');
+    document.getElementById('list-count').textContent=entries.length+' εγγραφές';
+    if (!entries.length) { list.innerHTML='<div class="empty"><div class="e-icon">🌅</div><p>Δεν υπάρχουν εγγραφές.</p></div>'; return; }
+    list.innerHTML=entries.map(e=>`<div class="entry-card"><div class="entry-icon" style="background:${CAT_COLOR[e.cat]||'#eee'}">${CAT_ICON[e.cat]||'•'}</div><div class="entry-body"><div class="entry-top"><span class="entry-cat">${CAT_LABELS[e.cat]||e.cat}</span><span class="entry-amount">${fmt(e.amount)}</span></div><div class="entry-desc">${e.item||e.note||'—'}</div><div class="entry-meta">Δωμ. ${e.room} · ${fmtDate(e.date)}</div></div><button class="btn-del" onclick="deleteEntry(${e.id})">✕</button></div>`).join('');
+  }
+</script>
+</body>
+</html>
